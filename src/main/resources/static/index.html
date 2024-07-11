@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .calculator {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .calculator input {
+            margin: 5px;
+            padding: 10px;
+            font-size: 1.2em;
+            width: 80px;
+        }
+        .calculator button {
+            padding: 10px;
+            font-size: 1.2em;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .history-container {
+            text-align: left;
+            margin-top: 30px;
+            width: 300px;
+            display: none;
+        }
+        .history-container ul {
+            padding: 0;
+        }
+        .history-container li {
+            list-style-type: none;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .toggle-btn, .clear-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .toggle-btn {
+            background-color: blue;
+            color: white;
+            border: none;
+        }
+        .toggle-btn:hover {
+            background-color: darkblue;
+        }
+        .clear-btn {
+            background-color: red;
+            color: white;
+            border: none;
+        }
+        .clear-btn:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <h1>Calculator</h1>
+    <input type="number" id="a" placeholder="Enter a">
+    <input type="number" id="b" placeholder="Enter b">
+    <br>
+    <button onclick="calculate('add')">Add</button>
+    <button onclick="calculate('subtract')">Subtract</button>
+    <button onclick="calculate('multiply')">Multiply</button>
+    <button onclick="calculate('divide')">Divide</button>
+    <div class="result" id="result"></div>
+    <div>
+        <button class="toggle-btn" onclick="toggleHistory()">Show History</button>
+    </div>
+    <div class="history-container" id="history-container">
+        <h2>History</h2>
+        <ul id="history-list"></ul>
+        <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+    </div>
+</div>
+<script>
+    let history = [];
+    let historyVisible = false;
+
+    function calculate(operation) {
+        const a = document.getElementById('a').value;
+        const b = document.getElementById('b').value;
+
+        fetch(`/${operation}?a=${a}&b=${b}`)
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('result').innerText = `Result: ${data}`;
+                addToHistory(operation, a, b, data);
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = `Error: ${error}`;
+            });
+    }
+
+    function addToHistory(operation, a, b, result) {
+        const historyItem = `${a} ${operation} ${b} = ${result}`;
+        history.push(historyItem);
+        updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+        const historyList = document.getElementById('history-list');
+        historyList.innerHTML = '';
+        history.forEach(item => {
+            const li = document.createElement('li');
+            li.innerText = item;
+            historyList.appendChild(li);
+        });
+    }
+
+    function toggleHistory() {
+        historyVisible = !historyVisible;
+        const historyContainer = document.getElementById('history-container');
+        const toggleButton = document.querySelector('.toggle-btn');
+        if (historyVisible) {
+            historyContainer.style.display = 'block';
+            toggleButton.innerText = 'Hide History';
+        } else {
+            historyContainer.style.display = 'none';
+            toggleButton.innerText = 'Show History';
+        }
+    }
+
+    function clearHistory() {
+        history = [];
+        updateHistoryUI();
+    }
+</script>
+</body>
+</html>
